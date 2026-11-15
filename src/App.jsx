@@ -118,133 +118,129 @@ function Flow({ d, on, color, dot, w = 3, dur = 1.7, label, lx, ly, dim = '#1e29
   );
 }
 
-/* LA REPRESA (CTE): más grande, protones que aceleran con la demanda, ola de agua, ATP y calor saliendo */
+/* LA REPRESA (CTE): franja horizontal de ancho completo, complejos legibles */
 function Dam({ phys }) {
   const speed = Math.max(0.35, Math.min(2.4, phys.pinwheelSpeed / 2.2)); // menor = más rápido
   const hypoxia = phys.hypoxia;
-  const chamberX = 24, chamberY = 58, chamberW = 252, chamberH = 150;
-  const waterH = (phys.damLevel / 100) * (chamberH - 24);
-  const waveTop = chamberY + chamberH - waterH;
-  let wave = `M -64 ${waveTop}`;
-  for (let i = 0; i < 10; i++) wave += ` Q ${-64 + i * 40 + 20} ${waveTop + (i % 2 ? 6 : -6)} ${-64 + (i + 1) * 40} ${waveTop}`;
-  wave += ` L 336 ${chamberY + chamberH} L -64 ${chamberY + chamberH} Z`;
-  const badgeW = phys.damBadge.length * 6.6 + 22;
-  const protons = [44, 78, 112, 146, 180, 214, 248];
+  const W = 940, H = 300;
+  // Cámara de protones (izquierda/centro)
+  const cx = 24, cy = 52, cw = 600, ch = 178;
+  const waterH = (phys.damLevel / 100) * (ch - 56);
+  const waveTop = cy + ch - 56 - waterH + 8;
+  let wave = `M ${cx - 80} ${waveTop}`;
+  for (let i = 0; i < 20; i++) wave += ` Q ${cx - 80 + i * 40 + 20} ${waveTop + (i % 2 ? 6 : -6)} ${cx - 80 + (i + 1) * 40} ${waveTop}`;
+  wave += ` L ${cx + cw + 80} ${cy + ch} L ${cx - 80} ${cy + ch} Z`;
+  const badgeW = phys.damBadge.length * 7 + 28;
   const tone = hypoxia ? '#f43f5e' : '#38bdf8';
+  const protons = Array.from({ length: 14 }, (_, i) => 60 + i * 40);
+  const complexes = [
+    { n: 'I', s: 'NADH', c: '#fde047' },
+    { n: 'II', s: 'FADH₂', c: '#7dd3fc' },
+    { n: 'III', s: 'CoQ → Cit c', c: '#fde047' },
+    { n: 'IV', s: 'O₂', c: '#7dd3fc' }
+  ];
+  const compW = 138, compGap = 12, compX0 = cx + 14;
   return (
-    <g transform="translate(8, 8)" filter="url(#cardShadow)">
+    <g filter="url(#cardShadow)">
       <defs>
-        <clipPath id="chamberClip"><rect x={chamberX} y={chamberY} width={chamberW} height={chamberH} rx="10" /></clipPath>
+        <clipPath id="chamberClip"><rect x={cx} y={cy} width={cw} height={ch} rx="12" /></clipPath>
       </defs>
-      <rect width="450" height="320" rx="18" fill="#0b1222" stroke="#1e3a5f" strokeWidth="1.8" />
-      <text x="18" y="32" fill="#38bdf8" fontSize="16" fontWeight="900" letterSpacing="0.04em">⚡ LA REPRESA (CTE)</text>
-      <rect x={450 - 16 - badgeW} y="10" width={badgeW} height="30" rx="15" fill="#091526" stroke={hypoxia ? '#f43f5e' : '#0284c7'} strokeWidth="1.3" />
-      <text x={450 - 16 - badgeW / 2} y="30" textAnchor="middle" fill={hypoxia ? '#fda4af' : '#7dd3fc'} fontSize="12" fontWeight="700">{phys.damBadge}</text>
-
-      <rect x="14" y="48" width="422" height="190" rx="14" fill="#060a14" stroke="#1e293b" strokeWidth="1.4" />
+      <rect width={W} height={H} rx="20" fill="#0b1222" stroke="#1e3a5f" strokeWidth="1.8" />
+      <text x="22" y="34" fill="#38bdf8" fontSize="19" fontWeight="900" letterSpacing="0.04em">⚡ LA REPRESA (CTE)</text>
+      <rect x={W - 22 - badgeW} y="12" width={badgeW} height="32" rx="16" fill="#091526" stroke={hypoxia ? '#f43f5e' : '#0284c7'} strokeWidth="1.4" />
+      <text x={W - 22 - badgeW / 2} y="33" textAnchor="middle" fill={hypoxia ? '#fda4af' : '#7dd3fc'} fontSize="13.5" fontWeight="700">{phys.damBadge}</text>
 
       {/* Cámara de protones */}
-      <rect x={chamberX} y={chamberY} width={chamberW} height={chamberH} rx="10" fill="#091326" stroke="#0369a1" strokeWidth="1.5" />
+      <rect x={cx} y={cy} width={cw} height={ch} rx="12" fill="#091326" stroke="#0369a1" strokeWidth="1.6" />
       <g clipPath="url(#chamberClip)">
-        <rect x={chamberX} y={waveTop} width={chamberW} height={waterH + 10} fill="url(#protonWater)" />
-        <g opacity="0.9">
-          <path d={wave} fill="url(#protonWater)">
-            <animateTransform attributeName="transform" type="translate" from="0 0" to="-80 0" dur={`${3 + speed * 2}s`} repeatCount="indefinite" />
-          </path>
-        </g>
+        <rect x={cx} y={waveTop} width={cw} height={cy + ch - waveTop + 10} fill="url(#protonWater)" />
+        <path d={wave} fill="url(#protonWater)" opacity="0.9">
+          <animateTransform attributeName="transform" type="translate" from="0 0" to="-80 0" dur={`${3 + speed * 2}s`} repeatCount="indefinite" />
+        </path>
         {!hypoxia && protons.map((px, i) => (
-          <circle key={i} cx={px} cy="180" r="4.8" fill="#7dd3fc" filter="url(#neonGlow)">
-            <animate attributeName="cy" values={`182;${waveTop + 6}`} dur={`${(1.2 + (i % 3) * 0.25) * speed}s`} begin={`${i * 0.17}s`} repeatCount="indefinite" />
-            <animate attributeName="opacity" values="0.1;1;0.2" dur={`${(1.2 + (i % 3) * 0.25) * speed}s`} begin={`${i * 0.17}s`} repeatCount="indefinite" />
+          <circle key={i} cx={px} cy={cy + ch - 60} r="5" fill="#7dd3fc" filter="url(#neonGlow)">
+            <animate attributeName="cy" values={`${cy + ch - 58};${waveTop + 6}`} dur={`${(1.2 + (i % 3) * 0.25) * speed}s`} begin={`${i * 0.13}s`} repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.1;1;0.2" dur={`${(1.2 + (i % 3) * 0.25) * speed}s`} begin={`${i * 0.13}s`} repeatCount="indefinite" />
           </circle>
         ))}
       </g>
-      <text x={chamberX + chamberW / 2} y="78" textAnchor="middle" fill="#e0f2fe" fontSize="11.5" fontWeight="800" stroke="#091326" strokeWidth="3" paintOrder="stroke">ESPACIO INTERMEMBRANA (↑H⁺)</text>
+      <text x={cx + cw / 2} y={cy + 24} textAnchor="middle" fill="#e0f2fe" fontSize="14" fontWeight="800" stroke="#091326" strokeWidth="4" paintOrder="stroke">ESPACIO INTERMEMBRANA (↑H⁺)</text>
 
-      {/* Complejos de la cadena en la membrana interna */}
-      {[['I', 'NADH'], ['II', 'FADH₂'], ['III', 'CoQ→Cit c'], ['IV', 'O₂']].map(([n, s], i) => (
-        <g key={n} transform={`translate(${chamberX + 8 + i * 61}, ${chamberY + chamberH - 26})`}>
-          <rect width="56" height="22" rx="7" fill="#0f172a" stroke={hypoxia && n === 'IV' ? '#f43f5e' : '#0ea5e9'} strokeWidth="1.2" />
-          <text x="28" y="10" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="900">{n}</text>
-          <text x="28" y="19.5" textAnchor="middle" fill="#bae6fd" fontSize="7.5" fontWeight="700">{s}</text>
+      {/* Complejos I-IV: grandes y legibles */}
+      {complexes.map((k, i) => (
+        <g key={k.n} transform={`translate(${compX0 + i * (compW + compGap)}, ${cy + ch - 52})`}>
+          <rect width={compW} height="42" rx="11" fill="#0f172a" stroke={hypoxia && k.n === 'IV' ? '#f43f5e' : '#0ea5e9'} strokeWidth="1.6" />
+          <text x="26" y="27" textAnchor="middle" fill="#fde047" fontSize="19" fontWeight="900">{k.n}</text>
+          <line x1="48" y1="8" x2="48" y2="34" stroke="#1e3a5f" strokeWidth="1.4" />
+          <text x={48 + (compW - 48) / 2} y="26.5" textAnchor="middle" fill={k.c} fontSize="14" fontWeight="800">{k.s}</text>
         </g>
       ))}
-      <text x={chamberX + chamberW / 2} y="228" textAnchor="middle" fill="#a8b5c9" fontSize="11" fontWeight="700" letterSpacing="0.05em">MATRIZ MITOCONDRIAL</text>
+      <text x={cx + cw / 2} y={cy + ch + 20} textAnchor="middle" fill="#a8b5c9" fontSize="13" fontWeight="700" letterSpacing="0.06em">MATRIZ MITOCONDRIAL</text>
 
-      {/* ENTRADA DE ELECTRONES DESDE LA NORIA -> Complejos I y II */}
+      {/* Entrada de electrones desde la Noria hacia los complejos I y II */}
       {!hypoxia && (
         <g>
-          {/* Dos caños: NADH -> Comp. I, FADH2 -> Comp. II */}
-          <path id="eIn1" d="M 16 232 Q 24 232 34 218" fill="none" stroke="#fde047" strokeWidth="3.2" strokeDasharray="6 4" className="active-stream" strokeLinecap="round" />
-          <path id="eIn2" d="M 16 240 Q 70 240 94 218" fill="none" stroke="#38bdf8" strokeWidth="3.2" strokeDasharray="6 4" className="active-stream" strokeLinecap="round" />
+          <path id="eIn1" d={`M 4 258 Q 30 258 62 ${cy + ch - 10}`} fill="none" stroke="#fde047" strokeWidth="3.6" strokeDasharray="7 4" className="active-stream" strokeLinecap="round" />
+          <path id="eIn2" d={`M 4 270 Q 130 270 200 ${cy + ch - 10}`} fill="none" stroke="#38bdf8" strokeWidth="3.6" strokeDasharray="7 4" className="active-stream" strokeLinecap="round" />
           {['eIn1', 'eIn2'].map((pid, k) =>
             [0, 0.35, 0.7].map((d, i) => (
-              <circle key={`${pid}-${i}`} r="3.8" fill={k === 0 ? '#fde047' : '#7dd3fc'} filter="url(#neonGlow)">
+              <circle key={`${pid}-${i}`} r="4.2" fill={k === 0 ? '#fde047' : '#7dd3fc'} filter="url(#neonGlow)">
                 <animateMotion dur={`${1.0 * speed}s`} begin={`${d * speed}s`} repeatCount="indefinite">
                   <mpath href={`#${pid}`} />
                 </animateMotion>
               </circle>
             ))
           )}
-          {/* Cartel de procedencia */}
-          <g transform="translate(112, 242)">
-            <rect x="0" y="-9" width="118" height="17" rx="8.5" fill="#082f49" stroke="#38bdf8" strokeWidth="1.3" />
-            <text x="59" y="3" textAnchor="middle" fill="#e0f2fe" fontSize="9.5" fontWeight="800">⚡ e⁻ desde la Noria</text>
-          </g>
         </g>
       )}
 
-      {/* Caída de protones hacia el molinete */}
-      <path d="M 276 122 L 322 122" stroke={tone} strokeWidth="4" strokeDasharray="5 3" className={hypoxia ? '' : 'active-stream'} />
+      {/* Caída de protones al molinete */}
+      <path d={`M ${cx + cw} 130 L 690 130`} stroke={tone} strokeWidth="5" strokeDasharray="6 4" className={hypoxia ? '' : 'active-stream'} />
       {!hypoxia && [0, 0.5].map((b, i) => (
-        <circle key={i} cx="278" cy="122" r="4.4" fill="#7dd3fc" filter="url(#neonGlow)">
-          <animate attributeName="cx" values="278;322" dur={`${0.7 * speed}s`} begin={`${b * speed}s`} repeatCount="indefinite" />
+        <circle key={i} cx={cx + cw} cy="130" r="5" fill="#7dd3fc" filter="url(#neonGlow)">
+          <animate attributeName="cx" values={`${cx + cw};690`} dur={`${0.7 * speed}s`} begin={`${b * speed}s`} repeatCount="indefinite" />
         </circle>
       ))}
 
       {/* Molinete: ATP sintasa */}
-      <text x="356" y="72" textAnchor="middle" fill="#fde68a" fontSize="11.5" fontWeight="800">MOLINETE (ATP Sintasa)</text>
-      <g transform="translate(356, 122)">
-        <circle r="38" fill="#091526" stroke={hypoxia ? '#f43f5e' : '#f59e0b'} strokeWidth="2.4" strokeDasharray="7 4" />
+      <text x="780" y="62" textAnchor="middle" fill="#fde68a" fontSize="14" fontWeight="800">MOLINETE (ATP Sintasa)</text>
+      <g transform="translate(780, 130)">
+        <circle r="50" fill="#091526" stroke={hypoxia ? '#f43f5e' : '#f59e0b'} strokeWidth="2.6" strokeDasharray="8 5" />
         <g className="pinwheel-rotor" style={{ animationDuration: `${phys.pinwheelSpeed}s` }}>
-          <line x1="-30" y1="0" x2="30" y2="0" stroke="#fbbf24" strokeWidth="5" strokeLinecap="round" />
-          <line x1="0" y1="-30" x2="0" y2="30" stroke="#fbbf24" strokeWidth="5" strokeLinecap="round" />
-          <line x1="-21" y1="-21" x2="21" y2="21" stroke="#f59e0b" strokeWidth="3.5" strokeLinecap="round" />
-          <line x1="21" y1="-21" x2="-21" y2="21" stroke="#f59e0b" strokeWidth="3.5" strokeLinecap="round" />
-          <circle r="8" fill="#f59e0b" />
+          <line x1="-40" y1="0" x2="40" y2="0" stroke="#fbbf24" strokeWidth="6" strokeLinecap="round" />
+          <line x1="0" y1="-40" x2="0" y2="40" stroke="#fbbf24" strokeWidth="6" strokeLinecap="round" />
+          <line x1="-28" y1="-28" x2="28" y2="28" stroke="#f59e0b" strokeWidth="4" strokeLinecap="round" />
+          <line x1="28" y1="-28" x2="-28" y2="28" stroke="#f59e0b" strokeWidth="4" strokeLinecap="round" />
+          <circle r="10" fill="#f59e0b" />
         </g>
-        <circle r="3.5" fill="#0f172a" />
+        <circle r="4" fill="#0f172a" />
       </g>
 
       {/* Salidas: ATP y calor */}
       {!hypoxia && (
         <>
-          <circle r="3.8" fill="#34d399" filter="url(#neonGlow)">
-            <animateMotion dur={`${1.2 * speed}s`} repeatCount="indefinite" path="M 346 158 L 323 184" />
+          <circle r="4.4" fill="#34d399" filter="url(#neonGlow)">
+            <animateMotion dur={`${1.2 * speed}s`} repeatCount="indefinite" path="M 760 180 L 728 214" />
           </circle>
-          <circle r="3.8" fill="#fb923c" filter="url(#neonGlow)">
-            <animateMotion dur={`${1.2 * speed}s`} begin="0.4s" repeatCount="indefinite" path="M 366 158 L 398 184" />
+          <circle r="4.4" fill="#fb923c" filter="url(#neonGlow)">
+            <animateMotion dur={`${1.2 * speed}s`} begin="0.4s" repeatCount="indefinite" path="M 800 180 L 842 214" />
           </circle>
         </>
       )}
-      <rect x="288" y="184" width="70" height="46" rx="10" fill="#064e3b" stroke="#10b981" strokeWidth="1.4" />
-      <text x="323" y="203" textAnchor="middle" fill="#d1fae5" fontSize="12" fontWeight="800">⚡ ATP</text>
-      <text x="323" y="220" textAnchor="middle" fill="#6ee7b7" fontSize="11" fontWeight="700">~40% ΔG</text>
-      <rect x="364" y="184" width="70" height="46" rx="10" fill="#431407" stroke="#f97316" strokeWidth="1.4" />
-      <text x="399" y="203" textAnchor="middle" fill="#fed7aa" fontSize="12" fontWeight="800">🔥 Calor</text>
-      <text x="399" y="220" textAnchor="middle" fill="#fdba74" fontSize="11" fontWeight="700">~60% Basal</text>
+      <rect x="660" y="214" width="98" height="66" rx="12" fill="#064e3b" stroke="#10b981" strokeWidth="1.6" />
+      <text x="709" y="240" textAnchor="middle" fill="#d1fae5" fontSize="16" fontWeight="800">⚡ ATP</text>
+      <text x="709" y="264" textAnchor="middle" fill="#6ee7b7" fontSize="14" fontWeight="700">~40% ΔG</text>
+      <rect x="800" y="214" width="112" height="66" rx="12" fill="#431407" stroke="#f97316" strokeWidth="1.6" />
+      <text x="856" y="240" textAnchor="middle" fill="#fed7aa" fontSize="16" fontWeight="800">🔥 Calor</text>
+      <text x="856" y="264" textAnchor="middle" fill="#fdba74" fontSize="14" fontWeight="700">~60% Basal</text>
 
-      {/* Analogía */}
-      <rect x="14" y="248" width="422" height="62" rx="12" fill="#070c18" stroke="#1e293b" strokeWidth="1.2" />
-      <text x="24" y="267" fill="#e2e8f0" fontSize="11.5">
-        <tspan fontWeight="900" fill="#38bdf8">Analogía:</tspan> NADH (Comp. I) y FADH₂ (Comp. II→CoQ) ceden e⁻
-      </text>
-      <text x="24" y="284" fill="#e2e8f0" fontSize="11.5">
-        al <tspan fill="#38bdf8" fontWeight="bold">O₂ (Comp. IV)</tspan> bombeando <tspan fill="#38bdf8" fontWeight="bold">H⁺ hacia arriba</tspan>. Al caer por el
-      </text>
-      <text x="24" y="301" fill="#e2e8f0" fontSize="11.5">
-        <tspan fill="#fbbf24" fontWeight="bold">molinete (ATP Sintasa)</tspan>, dan <tspan fill="#34d399" fontWeight="bold">~40% ATP</tspan> y <tspan fill="#fb923c" fontWeight="bold">~60% Calor</tspan>.
-      </text>
+      {/* Cartel de procedencia de los electrones */}
+      {!hypoxia && (
+        <g transform="translate(250, 290)">
+          <rect x="-96" y="-12" width="192" height="22" rx="11" fill="#082f49" stroke="#38bdf8" strokeWidth="1.4" />
+          <text x="0" y="3.5" textAnchor="middle" fill="#e0f2fe" fontSize="12" fontWeight="800">⚡ e⁻ desde la Noria</text>
+        </g>
+      )}
     </g>
   );
 }
@@ -1235,18 +1231,8 @@ export default function App() {
               <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${phys.krebsBadgeClass}`}>{phys.krebsBadge}</span>
             </div>
 
-            <div className="relative flex flex-col items-center justify-center my-1 bg-slate-950/60 border border-slate-800/80 rounded-2xl py-2.5 px-2 shadow-inner overflow-hidden">
-              <div
-                className={`absolute inset-0 pointer-events-none transition-opacity duration-700 opacity-25 ${
-                  phys.hypoxia
-                    ? 'bg-[radial-gradient(circle_at_center,#f43f5e_0%,transparent_70%)]'
-                    : phys.oaaEscape
-                    ? 'bg-[radial-gradient(circle_at_center,#a855f7_0%,transparent_70%)]'
-                    : exerciseLoad === 'aerobic'
-                    ? 'bg-[radial-gradient(circle_at_center,#06b6d4_0%,transparent_70%)]'
-                    : 'bg-[radial-gradient(circle_at_center,#10b981_0%,transparent_70%)]'
-                }`}
-              />
+            <div className="relative flex flex-1 flex-col items-center justify-center my-1 bg-slate-950/60 border border-slate-800/80 rounded-2xl py-1.5 px-1 shadow-inner overflow-hidden">
+              
 
               <div className={`mb-1 z-10 px-3.5 py-1 rounded-full bg-amber-950/95 border border-amber-500/70 text-amber-300 text-[11px] font-extrabold flex items-center gap-1.5 shadow-lg transition-transform ${exerciseLoad === 'aerobic' ? 'scale-105' : ''}`}>
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
@@ -1254,8 +1240,8 @@ export default function App() {
               </div>
 
               <svg
-                viewBox="-60 -14 400 316"
-                className={`w-full max-w-[460px] lg:max-w-[360px] overflow-visible select-none ${
+                viewBox="-24 -6 350 322"
+                className={`w-full max-w-[520px] lg:max-w-none overflow-visible select-none ${
                   phys.hypoxia ? 'noria-stalled-shake' : exerciseLoad === 'aerobic' ? 'noria-turbo-vib' : ''
                 }`}
               >
@@ -1272,7 +1258,7 @@ export default function App() {
                   <path id="acetylEntryPath" d="M 140 2 L 140 50" />
                   <path id="co2ExitPath1" d="M 198 92 Q 225 78 252 66" />
                   <path id="co2ExitPath2" d="M 198 188 Q 225 198 252 212" />
-                  <path id="nadhDischargePath" d="M 140 192 Q 215 262 326 276" />
+                  <path id="nadhDischargePath" d="M 140 192 Q 205 256 298 272" />
                   <path id="oaaEscapePath" d="M 62 128 Q 38 92 22 64" />
                 </defs>
 
@@ -1352,7 +1338,7 @@ export default function App() {
                 {/* ENERGÍA HACIA LA REPRESA: chorro grueso, partículas, flecha y cartel que pulsa con la velocidad */}
                 {!phys.hypoxia && (
                   <g>
-                    <path d="M 140 192 Q 215 262 326 276" fill="none" stroke="#0ea5e9" strokeWidth="11" opacity="0.18" strokeLinecap="round" />
+                    <path d="M 140 192 Q 205 256 298 272" fill="none" stroke="#0ea5e9" strokeWidth="11" opacity="0.18" strokeLinecap="round" />
                     <use href="#nadhDischargePath" fill="none" stroke="#38bdf8" strokeWidth="4.5" strokeDasharray="9 5" className="active-stream" strokeLinecap="round" />
                     {[0, 0.2, 0.4, 0.6, 0.8, 1.0].map((d, i) => (
                       <circle key={`nadh-${i}`} r={i % 2 ? 4.2 : 5.4} fill={i % 2 ? '#7dd3fc' : '#fde047'} filter="url(#noriaNeon)">
@@ -1365,15 +1351,15 @@ export default function App() {
                       </circle>
                     ))}
                     {/* Flecha */}
-                    <path d="M 306 262 L 330 276 L 304 286 Z" fill="#38bdf8" filter="url(#noriaNeon)">
+                    <path d="M 280 258 L 304 272 L 278 282 Z" fill="#38bdf8" filter="url(#noriaNeon)">
                       <animate attributeName="opacity" values="1;0.4;1" dur="0.9s" repeatCount="indefinite" />
                     </path>
                     {/* Cartel grande */}
-                    <g transform="translate(246, 296)">
-                      <rect x="-82" y="-13" width="164" height="26" rx="13" fill="#082f49" stroke="#38bdf8" strokeWidth="1.8" filter="url(#noriaNeon)">
+                    <g transform="translate(228, 302)">
+                      <rect x="-78" y="-12" width="156" height="24" rx="12" fill="#082f49" stroke="#38bdf8" strokeWidth="1.8" filter="url(#noriaNeon)">
                         <animate attributeName="stroke-opacity" values="1;0.4;1" dur="1.1s" repeatCount="indefinite" />
                       </rect>
-                      <text x="0" y="4.5" textAnchor="middle" fill="#e0f2fe" fontSize="11.5" fontWeight="900">⚡ Energía (e⁻) → Represa</text>
+                      <text x="0" y="4.5" textAnchor="middle" fill="#e0f2fe" fontSize="11" fontWeight="900">⚡ Energía (e⁻) → Represa</text>
                     </g>
                   </g>
                 )}
@@ -1432,7 +1418,7 @@ export default function App() {
           <div className="bg-[#080c17] border border-slate-800/90 rounded-2xl p-3 sm:p-4 shadow-2xl flex-1 flex flex-col justify-between relative overflow-hidden">
 
             <div className="relative w-full flex-1 flex items-start justify-center">
-              <svg viewBox="0 0 940 770" className="w-full h-auto select-none">
+              <svg viewBox="0 0 940 990" className="w-full h-auto select-none">
                 <defs>
                   <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="3" result="blur" />
@@ -1450,25 +1436,33 @@ export default function App() {
                   </linearGradient>
                 </defs>
 
-                {/* ---- Conexiones vasculares (debajo de los recuadros) ---- */}
-                <Flow d="M 545 352 Q 565 230 668 150" on color={flowKetones ? '#c084fc' : '#10b981'} dot={flowKetones ? '#d8b4fe' : '#34d399'} dur={1.8} label={flowKetones ? 'Glucosa + Cetonas' : 'Glucosa'} lx={555} ly={245} />
-                <Flow d="M 596 392 Q 640 345 700 322" on={flowVldl} color="#f59e0b" dot="#fbbf24" w={2.8} dur={1.9} label="VLDL (Apo B-100)" lx={625} ly={318} />
-                <Flow d="M 700 350 Q 645 410 596 428" on={flowLipolysisToLiver} color="#f59e0b" dot="#fbbf24" dur={1.7} label="AG Libres + Glicerol" lx={672} ly={430} />
-                <Flow d="M 810 372 L 800 556" on={flowLipolysisToMuscle} color="#f59e0b" dot="#fbbf24" w={2.8} dur={1.6} label="Ácidos Grasos" lx={805} ly={470} />
-                <Flow d="M 258 562 Q 300 485 368 446" on={flowIntestinePortal} color="#10b981" dot="#34d399" dur={1.5} label="Glucosa / AA (Porta)" lx={262} ly={500} />
-                <Flow d="M 296 648 Q 540 640 690 380" on={flowChylomicrons} color="#eab308" dot="#fde047" w={2.5} dur={2.2} label="Quilomicrones (Linfa)" lx={470} ly={622} dim="#1e293b" />
-                <Flow d="M 596 462 Q 650 500 690 560" on color="#06b6d4" dot="#38bdf8" w={2.5} dur={1.7} label={flowKetones ? 'Cetonas / Gluc' : 'Glucosa'} lx={598} ly={520} />
-                <Flow d="M 690 610 Q 560 600 480 520" on={flowCoriOrAlanine} color={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} dot={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} w={2.8} dur={1.5} label={exerciseLoad === 'strength' ? 'Lactato (Ciclo de Cori)' : 'Alanina (Ciclo Glu-Ala)'} lx={540} ly={578} />
-
-                {/* ---- LA REPRESA ---- */}
+                {/* ---- LA REPRESA: franja de ancho completo arriba ---- */}
                 <Dam phys={phys} />
 
+                {/* ---- Mapa de órganos. Hígado al centro (x=470, y≈645) ---- */}
+                {/* Hígado -> Cerebro: sale del borde superior-izquierdo del hígado */}
+                <Flow d="M 400 560 Q 330 520 270 498" on color={flowKetones ? '#c084fc' : '#10b981'} dot={flowKetones ? '#d8b4fe' : '#34d399'} dur={1.6} label={flowKetones ? 'Glucosa + Cetonas' : 'Glucosa'} lx={345} ly={518} />
+                {/* Hígado -> Tejido adiposo (VLDL): borde superior-derecho */}
+                <Flow d="M 540 560 Q 610 520 690 498" on={flowVldl} color="#f59e0b" dot="#fbbf24" w={2.8} dur={1.7} label="VLDL (Apo B-100)" lx={612} ly={516} />
+                {/* Tejido adiposo -> Hígado (lipólisis): borde derecho del hígado */}
+                <Flow d="M 800 498 Q 740 600 592 640" on={flowLipolysisToLiver} color="#f59e0b" dot="#fbbf24" dur={1.7} label="AG Libres + Glicerol" lx={712} ly={598} />
+                {/* Tejido adiposo -> Músculo (ácidos grasos): baja por la derecha */}
+                <Flow d="M 850 498 Q 905 640 850 780" on={flowLipolysisToMuscle} color="#f59e0b" dot="#fbbf24" w={2.8} dur={1.6} label="Ácidos Grasos" lx={890} ly={640} />
+                {/* Intestino -> Hígado (vena porta): borde inferior-izquierdo */}
+                <Flow d="M 220 790 Q 300 730 350 700" on={flowIntestinePortal} color="#10b981" dot="#34d399" dur={1.5} label="Glucosa / AA (Porta)" lx={262} ly={742} />
+                {/* Intestino -> Tejido adiposo (quilomicrones por linfa): arco por debajo del hígado */}
+                <Flow d="M 290 880 Q 620 960 780 498" on={flowChylomicrons} color="#eab308" dot="#fde047" w={2.5} dur={2.2} label="Quilomicrones (Linfa)" lx={470} ly={942} />
+                {/* Hígado -> Músculo */}
+                <Flow d="M 560 700 Q 620 745 690 790" on color="#06b6d4" dot="#38bdf8" w={2.5} dur={1.7} label={flowKetones ? 'Cetonas / Gluc' : 'Glucosa'} lx={632} ly={738} />
+                {/* Músculo -> Hígado (Cori / alanina): arco inferior */}
+                <Flow d="M 680 860 Q 550 850 480 792" on={flowCoriOrAlanine} color={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} dot={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} w={2.8} dur={1.5} label={exerciseLoad === 'strength' ? 'Lactato (Ciclo de Cori)' : 'Alanina (Ciclo Glu-Ala)'} lx={560} ly={858} />
+
                 {/* ---- ÓRGANOS ---- */}
-                <OrganCard {...organProps('brain')} x={660} y={14} title="CEREBRO" />
-                <OrganCard {...organProps('liver')} x={355} y={352} title="HÍGADO" />
-                <OrganCard {...organProps('adipose')} x={690} y={216} title="TEJIDO ADIPOSO" />
-                <OrganCard {...organProps('intestine')} x={40} y={562} title="INTESTINO" />
-                <OrganCard {...organProps('muscle')} x={680} y={556} title="MÚSCULO" />
+                <OrganCard {...organProps('brain')} x={110} y={340} w={250} title="CEREBRO" />
+                <OrganCard {...organProps('adipose')} x={600} y={340} w={260} title="TEJIDO ADIPOSO" />
+                <OrganCard {...organProps('liver')} x={350} y={560} w={240} title="HÍGADO" />
+                <OrganCard {...organProps('intestine')} x={40} y={780} w={250} title="INTESTINO" />
+                <OrganCard {...organProps('muscle')} x={650} y={780} w={260} title="MÚSCULO" />
               </svg>
             </div>
 
