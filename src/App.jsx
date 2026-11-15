@@ -1,35 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Activity, Flame, Zap, Droplets, Brain, Heart, 
-  Utensils, Dumbbell, Volume2, VolumeX, Info, 
-  ArrowRight, RefreshCw, Sparkles, Sliders, 
-  Layers, Gauge, ChevronRight, Eye
+  Activity, Flame, Zap, Dumbbell, Volume2, VolumeX, Info, 
+  ArrowRight, RefreshCw, Sliders, Layers, Gauge, ChevronRight
 } from 'lucide-react';
 
 export default function App() {
-  // Estados fisiológicos principales
-  const [metabolicState, setMetabolicState] = useState('postprandial'); // 'postprandial' | 'fasting' | 'prolonged_fasting'
-  const [exerciseLoad, setExerciseLoad] = useState('rest'); // 'rest' | 'aerobic' | 'strength'
-  const [uncoupled, setUncoupled] = useState(false); // Desacople mitocondrial (UCP / Termogénesis)
-  const [selectedOrgan, setSelectedOrgan] = useState('liver'); // 'brain' | 'liver' | 'muscle' | 'adipose' | 'intestine'
-  
-  // Navegación móvil (Smart Responsive)
-  const [mobileTab, setMobileTab] = useState('all'); // 'all' | 'krebs' | 'map' | 'enzymes'
+  const [metabolicState, setMetabolicState] = useState('postprandial');
+  const [exerciseLoad, setExerciseLoad] = useState('rest');
+  const [uncoupled, setUncoupled] = useState(false);
+  const [selectedOrgan, setSelectedOrgan] = useState('liver');
+  const [mobileTab, setMobileTab] = useState('all');
 
-  // Sintetizador Bioenergético (Web Audio API)
   const [audioEnabled, setAudioEnabled] = useState(false);
   const audioCtxRef = useRef(null);
   const oscRef = useRef(null);
-  const gainRef = useRef(null);
 
-  // Cálculos dinámicos del perfil hormonal y energético
   const getPhysiology = () => {
     let insulin = 85;
     let glucagon = 20;
     let adrenaline = 15;
     let atpRate = 55;
     let nadhLoad = 50;
-    let krebsSpeed = 4; // segundos por vuelta (menor = más rápido)
+    let krebsSpeed = 4;
     let oxaloacetateDepleted = false;
     let hypoxia = false;
 
@@ -45,7 +37,7 @@ export default function App() {
       insulin = 10;
       glucagon = 95;
       nadhLoad = 75;
-      oxaloacetateDepleted = true; // Desvío de OAA a gluconeogénesis -> Cetogénesis
+      oxaloacetateDepleted = true;
     }
 
     if (exerciseLoad === 'aerobic') {
@@ -58,9 +50,9 @@ export default function App() {
     } else if (exerciseLoad === 'strength') {
       insulin = Math.max(15, insulin - 15);
       adrenaline = 90;
-      atpRate = 30; // Cae fosforilación oxidativa por déficit de O2
-      nadhLoad = 95; // Acumulación de NADH frena Krebs
-      krebsSpeed = 9; // Rueda frenada por falta de NAD+
+      atpRate = 30;
+      nadhLoad = 95;
+      krebsSpeed = 9;
       hypoxia = true;
     } else {
       atpRate = metabolicState === 'postprandial' ? 60 : 45;
@@ -69,7 +61,7 @@ export default function App() {
 
     if (uncoupled) {
       atpRate = Math.max(15, Math.round(atpRate * 0.45));
-      krebsSpeed = Math.max(1.2, krebsSpeed * 0.7); // Se acelera oxidación para compensar pérdida de gradiente
+      krebsSpeed = Math.max(1.2, krebsSpeed * 0.7);
     }
 
     return {
@@ -86,7 +78,6 @@ export default function App() {
 
   const phys = getPhysiology();
 
-  // Control de audio ambiental generativo (Web Audio API)
   useEffect(() => {
     if (audioEnabled) {
       try {
@@ -112,7 +103,6 @@ export default function App() {
         osc.start();
 
         oscRef.current = osc;
-        gainRef.current = gain;
       } catch (e) {
         console.warn('Audio no soportado:', e);
       }
@@ -142,7 +132,6 @@ export default function App() {
     }
   }, [metabolicState, exerciseLoad, uncoupled]);
 
-  // Datos detallados por órgano
   const organDetails = {
     brain: {
       name: 'Cerebro',
@@ -267,25 +256,23 @@ export default function App() {
   const currentOrgan = organDetails[selectedOrgan];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 flex flex-col">
-      {/* HEADER PRINCIPAL (Escritorio + Móvil) */}
-      <header className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
+    <div className="min-h-screen w-full bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 flex flex-col">
+      <header className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-2.5">
         <div className="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
               <Activity className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent leading-none">
+              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent leading-none">
                 MetaLab
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+              <p className="text-xs text-slate-400 font-medium mt-0.5">
                 Simulador integral metabólico y bioenergético
               </p>
             </div>
           </div>
 
-          {/* Controles rápidos y Sintetizador */}
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
               <span className="text-slate-400">Estado:</span>
@@ -301,7 +288,7 @@ export default function App() {
 
             <button
               onClick={() => setAudioEnabled(!audioEnabled)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                 audioEnabled
                   ? 'bg-cyan-500/15 border-cyan-500/50 text-cyan-300 shadow-sm shadow-cyan-500/20'
                   : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
@@ -314,13 +301,12 @@ export default function App() {
           </div>
         </div>
 
-        {/* BARRA DE NAVEGACIÓN MÓVIL / TABLET (< 1024px) */}
-        <div className="lg:hidden mt-3 pt-2 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <div className="lg:hidden mt-2.5 pt-2 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto">
           {[
-            { id: 'all', label: '📱 Todo' },
-            { id: 'krebs', label: '🎡 Controles & Krebs' },
-            { id: 'map', label: '🗺️ Mapa & Represa' },
-            { id: 'enzymes', label: '🔬 Hormonas & Enzimas' }
+            { id: 'all', label: 'Todo' },
+            { id: 'krebs', label: 'Controles & Krebs' },
+            { id: 'map', label: 'Mapa & Represa' },
+            { id: 'enzymes', label: 'Hormonas & Enzimas' }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -337,20 +323,16 @@ export default function App() {
         </div>
       </header>
 
-      {/* CONTENEDOR PRINCIPAL DE 3 COLUMNAS EN ESCRITORIO */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
         
-        {/* COLUMNA IZQUIERDA: CONTROLES FISIOLÓGICOS + RUEDA DE KREBS (3 cols) */}
-        <section className={`lg:col-span-3 flex flex-col gap-4 ${mobileTab !== 'all' && mobileTab !== 'krebs' ? 'hidden lg:flex' : 'flex'}`}>
-          
-          {/* Panel de Variables Fisiológicas */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl">
-            <div className="flex items-center gap-2 mb-3">
+        <section className={`lg:col-span-3 flex flex-col gap-3 ${mobileTab !== 'all' && mobileTab !== 'krebs' ? 'hidden lg:flex' : 'flex'}`}>
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 shadow-xl">
+            <div className="flex items-center gap-2 mb-2.5">
               <Sliders className="w-4 h-4 text-cyan-400" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">Condición Metabólica</h2>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 mb-4">
+            <div className="grid grid-cols-1 gap-2 mb-3.5">
               {[
                 { id: 'postprandial', title: 'Postprandial (Absortivo)', desc: '↑ Insulina • Glucólisis y Síntesis', color: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300' },
                 { id: 'fasting', title: 'Ayuno Nocturno (12-18h)', desc: '↑ Glucagón • Glucogenólisis y Lipólisis', color: 'border-amber-500/50 bg-amber-500/10 text-amber-300' },
@@ -359,7 +341,7 @@ export default function App() {
                 <button
                   key={st.id}
                   onClick={() => setMetabolicState(st.id)}
-                  className={`text-left p-2.5 rounded-xl border transition-all ${
+                  className={`text-left p-2.5 rounded-xl border transition-all cursor-pointer ${
                     metabolicState === st.id
                       ? st.color + ' shadow-md'
                       : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700'
@@ -371,12 +353,12 @@ export default function App() {
               ))}
             </div>
 
-            <div className="flex items-center gap-2 mb-2.5">
+            <div className="flex items-center gap-2 mb-2">
               <Dumbbell className="w-4 h-4 text-rose-400" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">Demanda Física</h2>
             </div>
 
-            <div className="grid grid-cols-3 gap-1.5 mb-4">
+            <div className="grid grid-cols-3 gap-1.5 mb-3.5">
               {[
                 { id: 'rest', label: 'Reposo' },
                 { id: 'aerobic', label: 'Aeróbico' },
@@ -385,7 +367,7 @@ export default function App() {
                 <button
                   key={ex.id}
                   onClick={() => setExerciseLoad(ex.id)}
-                  className={`py-2 px-2 rounded-xl text-xs font-bold border text-center transition-all ${
+                  className={`py-2 px-2 rounded-xl text-xs font-bold border text-center transition-all cursor-pointer ${
                     exerciseLoad === ex.id
                       ? 'bg-rose-500/20 border-rose-500/60 text-rose-300 shadow-sm'
                       : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
@@ -396,8 +378,7 @@ export default function App() {
               ))}
             </div>
 
-            {/* Interruptor de Desacople Mitocondrial */}
-            <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+            <div className="pt-2.5 border-t border-slate-800/80 flex items-center justify-between">
               <div>
                 <div className="text-xs font-bold text-orange-300 flex items-center gap-1.5">
                   <Flame className="w-3.5 h-3.5 text-orange-400" />
@@ -407,7 +388,7 @@ export default function App() {
               </div>
               <button
                 onClick={() => setUncoupled(!uncoupled)}
-                className={`w-11 h-6 rounded-full transition-colors p-0.5 ${
+                className={`w-11 h-6 rounded-full transition-colors p-0.5 cursor-pointer ${
                   uncoupled ? 'bg-orange-500' : 'bg-slate-700'
                 }`}
               >
@@ -420,8 +401,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Rueda de Noria: Ciclo de Krebs */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl flex-1 flex flex-col justify-between">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 shadow-xl flex-1 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
@@ -438,7 +418,7 @@ export default function App() {
                   {phys.hypoxia ? 'Frenado (↑NADH)' : phys.oxaloacetateDepleted ? 'OAA Desviado' : 'Flujo Activo'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 mb-3">
+              <p className="text-[11px] text-slate-400 mb-2">
                 {phys.hypoxia 
                   ? 'Sin O₂ se acumula NADH e inhibe Isocitrato y α-Cetoglutarato DH.' 
                   : phys.oxaloacetateDepleted 
@@ -447,9 +427,8 @@ export default function App() {
               </p>
             </div>
 
-            {/* SVG Animado de la Rueda de Krebs */}
-            <div className="relative flex items-center justify-center my-2">
-              <svg viewBox="0 0 240 220" className="w-full max-w-[230px] overflow-visible">
+            <div className="relative flex items-center justify-center my-1">
+              <svg viewBox="0 0 240 215" className="w-full max-w-[215px] overflow-visible">
                 <defs>
                   <linearGradient id="krebsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#06b6d4" />
@@ -457,7 +436,6 @@ export default function App() {
                   </linearGradient>
                 </defs>
 
-                {/* Entrada Acetil-CoA */}
                 <path d="M 120 8 L 120 42" stroke="#fbbf24" strokeWidth="2.5" strokeDasharray="4 3" />
                 <polygon points="116,40 124,40 120,47" fill="#fbbf24" />
                 <rect x="76" y="2" width="88" height="18" rx="6" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
@@ -465,8 +443,7 @@ export default function App() {
                   Acetil-CoA (2C)
                 </text>
 
-                {/* Anillo giratorio */}
-                <g style={{ transformOrigin: '120px 115px', animation: `spin ${phys.krebsSpeed}s linear infinite` }}>
+                <g className="krebs-wheel" style={{ '--spin-duration': `${phys.krebsSpeed}s` }}>
                   <circle cx="120" cy="115" r="56" fill="none" stroke="url(#krebsGrad)" strokeWidth="6" strokeDasharray="24 10" opacity="0.85" />
                   <circle cx="120" cy="59" r="5" fill="#38bdf8" />
                   <circle cx="176" cy="115" r="5" fill="#34d399" />
@@ -474,7 +451,6 @@ export default function App() {
                   <circle cx="64" cy="115" r="5" fill="#fb7185" />
                 </g>
 
-                {/* Nodos fijos de referencia */}
                 <g>
                   <rect x="85" y="46" width="70" height="18" rx="5" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
                   <text x="120" y="58" textAnchor="middle" fill="#e0f2fe" fontSize="9" fontWeight="bold">Citrato (6C)</text>
@@ -489,7 +465,6 @@ export default function App() {
                   <text x="45" y="118" textAnchor="middle" fill="#ffe4e6" fontSize="8.5" fontWeight="bold">Oxalacetato</text>
                 </g>
 
-                {/* Desvío de Oxalacetato en ayuno prolongado */}
                 {phys.oxaloacetateDepleted && (
                   <g>
                     <path d="M 35 104 Q 25 75 52 62" fill="none" stroke="#c084fc" strokeWidth="2" strokeDasharray="3 2" />
@@ -499,7 +474,6 @@ export default function App() {
                   </g>
                 )}
 
-                {/* Centro: Producción de equivalentes reductores */}
                 <circle cx="120" cy="115" r="28" fill="#0f172a" stroke="#1e293b" strokeWidth="1.5" />
                 <text x="120" y="111" textAnchor="middle" fill="#38bdf8" fontSize="9.5" fontWeight="bold">3 NADH</text>
                 <text x="120" y="122" textAnchor="middle" fill="#34d399" fontSize="9" fontWeight="bold">1 FADH₂</text>
@@ -507,19 +481,17 @@ export default function App() {
               </svg>
             </div>
 
-            <div className="bg-slate-950/70 rounded-xl p-2.5 border border-slate-800/80 text-[11px] text-slate-300 flex items-center justify-between">
+            <div className="bg-slate-950/70 rounded-xl p-2 border border-slate-800/80 text-[11px] text-slate-300 flex items-center justify-between">
               <span>Carga reductora (NADH/FADH₂):</span>
               <span className="font-mono font-bold text-cyan-400">{phys.nadhLoad}%</span>
             </div>
           </div>
         </section>
 
-        {/* COLUMNA CENTRAL: MAPA INTERORGÁNICO + CENTRAL HIDROELÉCTRICA CTE (6 cols) */}
-        <section className={`lg:col-span-6 flex flex-col gap-4 ${mobileTab !== 'all' && mobileTab !== 'map' ? 'hidden lg:flex' : 'flex'}`}>
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xl flex-1 flex flex-col justify-between relative overflow-hidden">
+        <section className={`lg:col-span-6 flex flex-col gap-3 ${mobileTab !== 'all' && mobileTab !== 'map' ? 'hidden lg:flex' : 'flex'}`}>
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 shadow-xl flex-1 flex flex-col justify-between relative overflow-hidden">
             
-            {/* Encabezado del Mapa */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2 z-10">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-1 z-10">
               <div>
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                   <Layers className="w-4 h-4 text-cyan-400" />
@@ -534,23 +506,8 @@ export default function App() {
               </div>
             </div>
 
-            {/* MÓDULO DE LA REPRESA (CTE) EN MÓVIL (Arriba del mapa para no tapar órganos) */}
-            <div className="lg:hidden mb-3 bg-slate-950/90 border border-cyan-500/30 rounded-xl p-3">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-bold text-cyan-300 flex items-center gap-1">
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  La Represa (CTE y Fosforilación Oxidativa)
-                </span>
-                <span className="text-xs font-mono font-bold text-emerald-400">ATP: {phys.atpRate}%</span>
-              </div>
-              <p className="text-[10px] text-slate-400 leading-snug">
-                Electrones bombean H⁺ a la represa → mueven la turbina (ATP Sintasa) o escapan como calor por UCP.
-              </p>
-            </div>
-
-            {/* LIENZO SVG INTERACTIVO: MAPA + REPRESA CTE */}
-            <div className="relative w-full flex-1 flex items-center justify-center min-h-[430px] sm:min-h-[500px]">
-              <svg viewBox="0 0 680 540" className="w-full h-full max-h-[560px] select-none">
+            <div className="relative w-full flex-1 flex items-center justify-center">
+              <svg viewBox="0 0 680 520" className="w-full h-auto max-h-[500px] select-none">
                 <defs>
                   <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="3" result="blur" />
@@ -562,14 +519,9 @@ export default function App() {
                   </linearGradient>
                 </defs>
 
-                {/* =========================================================
-                    MÓDULO SUPERIOR IZQUIERDO: CENTRAL HIDROELÉCTRICA (CTE)
-                   ========================================================= */}
-                <g transform="translate(10, 10)" className="hidden lg:block">
-                  {/* Contenedor compacto con aire respecto a la ruta del cerebro */}
+                <g transform="translate(10, 10)">
                   <rect x="0" y="0" width="252" height="178" rx="14" fill="#070d19" stroke="#1e3a5f" strokeWidth="1.5" />
                   
-                  {/* Título y Analogía breve */}
                   <text x="12" y="20" fill="#38bdf8" fontSize="11.5" fontWeight="bold">
                     ⚡ La Represa Mitocondrial (CTE)
                   </text>
@@ -577,26 +529,21 @@ export default function App() {
                     e⁻ bombean H⁺ → turbina genera ATP o desagüe UCP
                   </text>
 
-                  {/* 1. Cable de electrones (Complejos I-III-IV) */}
                   <rect x="12" y="46" width="108" height="22" rx="6" fill="#0f172a" stroke="#0284c7" strokeWidth="1" />
                   <text x="66" y="60" textAnchor="middle" fill="#7dd3fc" fontSize="9.5" fontWeight="bold">
                     Bombas I • III • IV (e⁻)
                   </text>
-                  {/* Partículas de electrones */}
                   {!phys.hypoxia && (
                     <circle cx="24" cy="57" r="3" fill="#38bdf8" filter="url(#glow)">
                       <animate attributeName="cx" values="20;112" dur={`${Math.max(0.7, phys.krebsSpeed * 0.4)}s`} repeatCount="indefinite" />
                     </circle>
                   )}
 
-                  {/* Flecha bombeo H+ */}
                   <path d="M 66 70 L 66 84" stroke="#38bdf8" strokeWidth="2" />
                   <polygon points="62,82 70,82 66,88" fill="#38bdf8" />
                   <text x="95" y="81" fill="#38bdf8" fontSize="8.5" fontWeight="bold">Bombeo H⁺</text>
 
-                  {/* 2. Represa de Protones (Espacio Intermembrana) */}
                   <rect x="12" y="90" width="112" height="66" rx="8" fill="#0f172a" stroke="#0369a1" strokeWidth="1.2" />
-                  {/* Nivel dinámico de protones */}
                   <rect 
                     x="14" 
                     y={154 - (phys.nadhLoad * 0.52)} 
@@ -617,7 +564,6 @@ export default function App() {
                     </text>
                   )}
 
-                  {/* 3. Compuerta de Desagüe Lateral (Desacople UCP -> Calor) */}
                   <path d="M 124 106 L 166 106" stroke={uncoupled ? '#f97316' : '#334155'} strokeWidth={uncoupled ? '3.5' : '1.5'} strokeDasharray={uncoupled ? 'none' : '3 3'} />
                   <rect x="166" y="92" width="76" height="28" rx="6" fill={uncoupled ? '#431407' : '#0f172a'} stroke={uncoupled ? '#f97316' : '#334155'} strokeWidth="1.2" />
                   <text x="204" y="104" textAnchor="middle" fill={uncoupled ? '#fdba74' : '#64748b'} fontSize="8.8" fontWeight="bold">
@@ -627,13 +573,11 @@ export default function App() {
                     {uncoupled ? '🔥 CALOR ACTIVO' : 'Cerrado'}
                   </text>
 
-                  {/* 4. Turbina ATP Sintasa (Debajo del desagüe naranja con buen aire) */}
                   <path d="M 124 140 L 166 140" stroke={!uncoupled && !phys.hypoxia ? '#10b981' : '#334155'} strokeWidth="2.5" />
                   <rect x="166" y="126" width="76" height="42" rx="7" fill="#064e3b" fillOpacity={phys.atpRate > 35 ? '0.55' : '0.2'} stroke="#10b981" strokeWidth="1.2" />
                   <text x="204" y="140" textAnchor="middle" fill="#a7f3d0" fontSize="8.5" fontWeight="bold">
                     Turbina Sintasa
                   </text>
-                  {/* Sigla ATP bien separada por debajo del gráfico naranja */}
                   <text 
                     x="204" 
                     y="159" 
@@ -641,19 +585,13 @@ export default function App() {
                     fill="#34d399" 
                     fontSize="13" 
                     fontWeight="900"
-                    className={phys.atpRate > 40 ? 'animate-pulse' : ''}
                   >
                     ATP {phys.atpRate}%
                   </text>
                 </g>
 
-                {/* =========================================================
-                    RUTAS METABÓLICAS ENTRE ÓRGANOS (Despejadas de La Represa)
-                   ========================================================= */}
-                
-                {/* Ruta Hígado -> Cerebro (Curvada hacia la derecha para no tocar La Represa) */}
                 <path 
-                  d="M 365 245 Q 395 160 445 95" 
+                  d="M 365 235 Q 395 155 445 95" 
                   fill="none" 
                   stroke={metabolicState === 'prolonged_fasting' ? '#c084fc' : '#10b981'} 
                   strokeWidth="3" 
@@ -661,8 +599,7 @@ export default function App() {
                 />
                 <polygon points="441,92 450,90 447,100" fill={metabolicState === 'prolonged_fasting' ? '#c084fc' : '#10b981'} />
                 
-                {/* Etiqueta Glucosa / Cetonas bien separada de La Represa */}
-                <g transform="translate(348, 152)">
+                <g transform="translate(348, 145)">
                   <rect 
                     x="0" 
                     y="0" 
@@ -685,81 +622,72 @@ export default function App() {
                   </text>
                 </g>
 
-                {/* Ruta Intestino -> Hígado (Vena Porta en Postprandial) */}
                 <path 
-                  d="M 480 430 Q 430 355 375 305" 
+                  d="M 480 415 Q 430 345 375 295" 
                   fill="none" 
                   stroke={metabolicState === 'postprandial' ? '#10b981' : '#334155'} 
                   strokeWidth={metabolicState === 'postprandial' ? '3' : '1.5'} 
                   strokeDasharray="5 4"
                 />
                 {metabolicState === 'postprandial' && (
-                  <g transform="translate(415, 355)">
+                  <g transform="translate(415, 345)">
                     <rect x="0" y="0" width="96" height="20" rx="6" fill="#0f172a" stroke="#10b981" strokeWidth="1" />
                     <text x="48" y="13.5" textAnchor="middle" fill="#6ee7b7" fontSize="9.5" fontWeight="bold">Porta: Glucosa/AA</text>
                   </g>
                 )}
 
-                {/* Ruta Intestino -> Tejido Adiposo (Quilomicrones Apo B-48) */}
                 <path 
-                  d="M 455 465 L 225 465" 
+                  d="M 455 450 L 225 450" 
                   fill="none" 
                   stroke={metabolicState === 'postprandial' ? '#f59e0b' : '#334155'} 
                   strokeWidth={metabolicState === 'postprandial' ? '3' : '1.5'} 
                   strokeDasharray="6 4"
                 />
                 {metabolicState === 'postprandial' && (
-                  <g transform="translate(268, 454)">
+                  <g transform="translate(268, 439)">
                     <rect x="0" y="0" width="144" height="21" rx="6" fill="#0f172a" stroke="#f59e0b" strokeWidth="1" />
                     <text x="72" y="14" textAnchor="middle" fill="#fde68a" fontSize="9.5" fontWeight="bold">Quilomicrones (Apo B-48)</text>
                   </g>
                 )}
 
-                {/* Ruta Tejido Adiposo -> Hígado y Músculo (Ácidos Grasos Libres en Ayuno/Ejercicio) */}
                 <path 
-                  d="M 155 420 Q 155 335 280 285" 
+                  d="M 155 405 Q 155 325 280 275" 
                   fill="none" 
                   stroke={metabolicState !== 'postprandial' || exerciseLoad !== 'rest' ? '#f59e0b' : '#334155'} 
                   strokeWidth={metabolicState !== 'postprandial' || exerciseLoad !== 'rest' ? '3' : '1.5'} 
                   strokeDasharray="5 4"
                 />
                 <path 
-                  d="M 195 430 Q 340 385 495 295" 
+                  d="M 195 415 Q 340 375 495 285" 
                   fill="none" 
                   stroke={metabolicState !== 'postprandial' || exerciseLoad === 'aerobic' ? '#f59e0b' : '#334155'} 
                   strokeWidth={metabolicState !== 'postprandial' || exerciseLoad === 'aerobic' ? '2.5' : '1.2'} 
                   strokeDasharray="5 4"
                 />
                 {(metabolicState !== 'postprandial' || exerciseLoad !== 'rest') && (
-                  <g transform="translate(132, 342)">
+                  <g transform="translate(132, 332)">
                     <rect x="0" y="0" width="114" height="20" rx="6" fill="#0f172a" stroke="#f59e0b" strokeWidth="1" />
                     <text x="57" y="13.5" textAnchor="middle" fill="#fcd34d" fontSize="9.5" fontWeight="bold">Ácidos Grasos + Glicerol</text>
                   </g>
                 )}
 
-                {/* Ruta Hígado <-> Músculo (Ciclo de Cori / Glucosa / VLDL) */}
                 <path 
-                  d="M 395 270 L 495 270" 
+                  d="M 395 265 L 495 265" 
                   fill="none" 
                   stroke={exerciseLoad === 'strength' ? '#fb7185' : '#38bdf8'} 
                   strokeWidth="2.8" 
                 />
-                <g transform="translate(398, 244)">
+                <g transform="translate(398, 238)">
                   <rect x="0" y="0" width="96" height="20" rx="6" fill="#0f172a" stroke={exerciseLoad === 'strength' ? '#fb7185' : '#38bdf8'} strokeWidth="1" />
                   <text x="48" y="13.5" textAnchor="middle" fill={exerciseLoad === 'strength' ? '#fecdd3' : '#bae6fd'} fontSize="9" fontWeight="bold">
                     {exerciseLoad === 'strength' ? 'Ciclo de Cori (Lactato)' : metabolicState === 'postprandial' ? 'VLDL (Apo B-100)' : 'Glucosa / Cetonas'}
                   </text>
                 </g>
 
-                {/* =========================================================
-                    NODOS DE ÓRGANOS CLICKEABLES
-                   ========================================================= */}
-
-                {/* 1. CEREBRO (Desplazado a la derecha para dar aire a La Represa) */}
                 <g 
                   transform="translate(495, 65)" 
                   onClick={() => setSelectedOrgan('brain')} 
-                  className="cursor-pointer transition-transform hover:scale-105"
+                  className="cursor-pointer hover:opacity-90"
                 >
                   <circle r="42" fill="#1e1b4b" stroke={selectedOrgan === 'brain' ? '#c084fc' : '#6366f1'} strokeWidth={selectedOrgan === 'brain' ? '3.5' : '2'} />
                   <text y="-4" textAnchor="middle" fill="#e9d5ff" fontSize="13" fontWeight="bold">🧠 Cerebro</text>
@@ -768,11 +696,10 @@ export default function App() {
                   </text>
                 </g>
 
-                {/* 2. HÍGADO (Centro) */}
                 <g 
-                  transform="translate(335, 275)" 
+                  transform="translate(335, 265)" 
                   onClick={() => setSelectedOrgan('liver')} 
-                  className="cursor-pointer transition-transform hover:scale-105"
+                  className="cursor-pointer hover:opacity-90"
                 >
                   <circle r="50" fill="#271a0c" stroke={selectedOrgan === 'liver' ? '#fbbf24' : '#d97706'} strokeWidth={selectedOrgan === 'liver' ? '3.5' : '2'} />
                   <text y="-6" textAnchor="middle" fill="#fef3c7" fontSize="14" fontWeight="bold">🫀 Hígado</text>
@@ -781,11 +708,10 @@ export default function App() {
                   </text>
                 </g>
 
-                {/* 3. MÚSCULO ESQUELÉTICO (Derecha) */}
                 <g 
-                  transform="translate(555, 275)" 
+                  transform="translate(555, 265)" 
                   onClick={() => setSelectedOrgan('muscle')} 
-                  className="cursor-pointer transition-transform hover:scale-105"
+                  className="cursor-pointer hover:opacity-90"
                 >
                   <circle r="48" fill="#2c0b14" stroke={selectedOrgan === 'muscle' ? '#fb7185' : '#e11d48'} strokeWidth={selectedOrgan === 'muscle' ? '3.5' : '2'} />
                   <text y="-6" textAnchor="middle" fill="#ffe4e6" fontSize="13.5" fontWeight="bold">💪 Músculo</text>
@@ -794,11 +720,10 @@ export default function App() {
                   </text>
                 </g>
 
-                {/* 4. TEJIDO ADIPOSO (Abajo Izquierda) */}
                 <g 
-                  transform="translate(155, 465)" 
+                  transform="translate(155, 450)" 
                   onClick={() => setSelectedOrgan('adipose')} 
-                  className="cursor-pointer transition-transform hover:scale-105"
+                  className="cursor-pointer hover:opacity-90"
                 >
                   <circle r="45" fill="#261f07" stroke={selectedOrgan === 'adipose' ? '#facc15' : '#ca8a04'} strokeWidth={selectedOrgan === 'adipose' ? '3.5' : '2'} />
                   <text y="-5" textAnchor="middle" fill="#fef9c3" fontSize="13" fontWeight="bold">🟡 Adiposo</text>
@@ -807,11 +732,10 @@ export default function App() {
                   </text>
                 </g>
 
-                {/* 5. INTESTINO DELGADO (Abajo Derecha) */}
                 <g 
-                  transform="translate(515, 465)" 
+                  transform="translate(515, 450)" 
                   onClick={() => setSelectedOrgan('intestine')} 
-                  className="cursor-pointer transition-transform hover:scale-105"
+                  className="cursor-pointer hover:opacity-90"
                 >
                   <circle r="45" fill="#06281e" stroke={selectedOrgan === 'intestine' ? '#34d399' : '#059669'} strokeWidth={selectedOrgan === 'intestine' ? '3.5' : '2'} />
                   <text y="-5" textAnchor="middle" fill="#d1fae5" fontSize="13" fontWeight="bold">🧬 Intestino</text>
@@ -822,7 +746,6 @@ export default function App() {
               </svg>
             </div>
 
-            {/* Acceso rápido móvil a enzimas del órgano seleccionado */}
             <div className="lg:hidden mt-2 pt-2 border-t border-slate-800 flex items-center justify-between">
               <span className="text-xs text-slate-300">
                 Seleccionado: <strong className={currentOrgan.color}>{currentOrgan.name}</strong>
@@ -837,18 +760,14 @@ export default function App() {
           </div>
         </section>
 
-        {/* COLUMNA DERECHA: PERFIL HORMONAL + INSPECTOR DE ÓRGANO (3 cols) */}
-        <section className={`lg:col-span-3 flex flex-col gap-4 ${mobileTab !== 'all' && mobileTab !== 'enzymes' ? 'hidden lg:flex' : 'flex'}`}>
-          
-          {/* Barras Hormonales en Vivo */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl">
-            <div className="flex items-center gap-2 mb-3">
+        <section className={`lg:col-span-3 flex flex-col gap-3 ${mobileTab !== 'all' && mobileTab !== 'enzymes' ? 'hidden lg:flex' : 'flex'}`}>
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 shadow-xl">
+            <div className="flex items-center gap-2 mb-2.5">
               <Gauge className="w-4 h-4 text-amber-400" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">Señalización Hormonal</h2>
             </div>
 
-            <div className="space-y-3">
-              {/* Insulina */}
+            <div className="space-y-2.5">
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="font-semibold text-emerald-300">Insulina (Anabólica)</span>
@@ -859,7 +778,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Glucagón */}
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="font-semibold text-amber-300">Glucagón (Catabólico)</span>
@@ -870,7 +788,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Adrenalina */}
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="font-semibold text-rose-300">Adrenalina (Estrés / Ejercicio)</span>
@@ -883,8 +800,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Inspector Detallado del Órgano Seleccionado */}
-          <div className={`bg-slate-900/80 border ${currentOrgan.border} rounded-2xl p-4 shadow-xl flex-1 flex flex-col justify-between`}>
+          <div className={`bg-slate-900/80 border ${currentOrgan.border} rounded-2xl p-3.5 shadow-xl flex-1 flex flex-col justify-between`}>
             <div>
               <div className="flex items-center justify-between gap-2 mb-1">
                 <h3 className={`text-base font-extrabold ${currentOrgan.color}`}>
@@ -894,15 +810,14 @@ export default function App() {
                   Órgano Activo
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mb-3">{currentOrgan.subtitle}</p>
+              <p className="text-xs text-slate-400 mb-2.5">{currentOrgan.subtitle}</p>
 
-              {/* Selector rápido de órganos */}
-              <div className="flex flex-wrap gap-1 mb-4">
+              <div className="flex flex-wrap gap-1 mb-3">
                 {Object.keys(organDetails).map((key) => (
                   <button
                     key={key}
                     onClick={() => setSelectedOrgan(key)}
-                    className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                    className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                       selectedOrgan === key
                         ? 'bg-slate-700 text-white'
                         : 'bg-slate-950/60 text-slate-400 hover:text-slate-200'
@@ -913,8 +828,7 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Flujo de Sustratos */}
-              <div className="mb-4">
+              <div className="mb-3">
                 <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
                   Sustratos y Vías Dominantes
                 </h4>
@@ -928,15 +842,14 @@ export default function App() {
                 </ul>
               </div>
 
-              {/* Regulación Enzimática */}
-              <div className="mb-3">
+              <div className="mb-2.5">
                 <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
                   Enzimas Reguladoras Clave
                 </h4>
                 <div className="space-y-2">
                   {currentOrgan.enzymes.map((enz, idx) => (
-                    <div key={idx} className="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5">
-                      <div className="flex items-center justify-between gap-1 mb-1">
+                    <div key={idx} className="bg-slate-950/80 border border-slate-800 rounded-xl p-2">
+                      <div className="flex items-center justify-between gap-1 mb-0.5">
                         <span className="text-xs font-bold text-slate-100">{enz.name}</span>
                         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300">
                           {enz.status}
@@ -949,8 +862,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Nota Bioquímica */}
-            <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 text-[11px] text-slate-300 flex items-start gap-2">
+            <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-2 text-[11px] text-slate-300 flex items-start gap-2">
               <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
               <span>{currentOrgan.note}</span>
             </div>

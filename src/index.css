@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes krebsSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.krebs-wheel {
+  transform-origin: 120px 115px;
+  animation: krebsSpin var(--spin-duration, 4s) linear infinite;
+}
