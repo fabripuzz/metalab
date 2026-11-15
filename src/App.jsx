@@ -46,7 +46,7 @@ const ORGAN_THEME = {
 };
 
 /* Recuadro de órgano: el alto se calcula según el texto, así nada se sale */
-function OrganCard({ id, x, y, w = 240, icon, title, badges, selected, hovered, onSelect, onHover }) {
+function OrganCard({ id, x, y, w = 240, minH = 0, icon, title, badges, selected, hovered, onSelect, onHover }) {
   const th = ORGAN_THEME[id];
   const maxChars = Math.floor((w - 52) / 6.3);
   let cy = 76;
@@ -57,7 +57,7 @@ function OrganCard({ id, x, y, w = 240, icon, title, badges, selected, hovered, 
     cy += h + 8;
     return p;
   });
-  const h = cy + 10;
+  const h = Math.max(cy + 10, minH);
   const active = selected || hovered;
   return (
     <g
@@ -98,11 +98,22 @@ function OrganCard({ id, x, y, w = 240, icon, title, badges, selected, hovered, 
 }
 
 /* Flujo vascular entre órganos: línea + partículas + etiqueta que se ajusta al texto */
-function Flow({ d, on, color, dot, w = 3, dur = 1.7, label, lx, ly, dim = '#1e293b' }) {
+function Flow({ d, on, color, dot, w = 3, dur = 1.7, label, lx, ly, dim = '#1e293b', arrow }) {
   const lw = label ? label.length * 6.1 + 22 : 0;
+  // Punta de flecha: ángulo calculado desde el último tramo del trazo
+  let tip = null;
+  if (arrow && on) {
+    const nums = d.match(/-?\d+(\.\d+)?/g).map(Number);
+    const n = nums.length;
+    const [x2, y2, x1, y1] = [nums[n - 2], nums[n - 1], nums[n - 4], nums[n - 3]];
+    tip = { x: x2, y: y2, a: (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI };
+  }
   return (
     <g>
       <path d={d} fill="none" stroke={on ? color : dim} strokeWidth={on ? w : 1.5} strokeDasharray="6 4" className={on ? 'active-stream' : ''} />
+      {tip && (
+        <path d="M -13 -7 L 0 0 L -13 7 Z" fill={color} transform={`translate(${tip.x}, ${tip.y}) rotate(${tip.a})`} filter="url(#neonGlow)" />
+      )}
       {on && [0, dur / 2].map((b, i) => (
         <circle key={i} r="4.3" fill={dot || color} filter="url(#neonGlow)">
           <animateMotion dur={`${dur}s`} begin={`${b}s`} repeatCount="indefinite" path={d} />
@@ -1453,14 +1464,14 @@ export default function App() {
                 {/* Intestino -> Tejido adiposo (quilomicrones por linfa): arco por debajo del hígado */}
                 <Flow d="M 290 880 Q 620 960 780 498" on={flowChylomicrons} color="#eab308" dot="#fde047" w={2.5} dur={2.2} label="Quilomicrones (Linfa)" lx={470} ly={942} />
                 {/* Hígado -> Músculo */}
-                <Flow d="M 560 700 Q 620 745 690 790" on color="#06b6d4" dot="#38bdf8" w={2.5} dur={1.7} label={flowKetones ? 'Cetonas / Gluc' : 'Glucosa'} lx={632} ly={738} />
+                <Flow d="M 575 716 Q 635 750 705 778" on color="#06b6d4" dot="#38bdf8" w={2.5} dur={1.7} label={flowKetones ? 'Cetonas / Gluc' : 'Glucosa'} lx={640} ly={736} arrow />
                 {/* Músculo -> Hígado (Cori / alanina): arco inferior */}
-                <Flow d="M 680 860 Q 550 850 480 792" on={flowCoriOrAlanine} color={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} dot={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} w={2.8} dur={1.5} label={exerciseLoad === 'strength' ? 'Lactato (Ciclo de Cori)' : 'Alanina (Ciclo Glu-Ala)'} lx={560} ly={858} />
+                <Flow d="M 650 868 Q 520 860 470 748" on={flowCoriOrAlanine} color={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} dot={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} w={2.8} dur={1.5} label={exerciseLoad === 'strength' ? 'Lactato (Ciclo de Cori)' : 'Alanina (Ciclo Glu-Ala)'} lx={540} ly={858} arrow />
 
                 {/* ---- ÓRGANOS ---- */}
                 <OrganCard {...organProps('brain')} x={110} y={340} w={250} title="CEREBRO" />
                 <OrganCard {...organProps('adipose')} x={600} y={340} w={260} title="TEJIDO ADIPOSO" />
-                <OrganCard {...organProps('liver')} x={350} y={560} w={240} title="HÍGADO" />
+                <OrganCard {...organProps('liver')} x={350} y={560} w={240} minH={186} title="HÍGADO" />
                 <OrganCard {...organProps('intestine')} x={40} y={780} w={250} title="INTESTINO" />
                 <OrganCard {...organProps('muscle')} x={650} y={780} w={260} title="MÚSCULO" />
               </svg>
