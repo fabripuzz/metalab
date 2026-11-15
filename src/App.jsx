@@ -171,6 +171,29 @@ function Dam({ phys }) {
       ))}
       <text x={chamberX + chamberW / 2} y="228" textAnchor="middle" fill="#a8b5c9" fontSize="11" fontWeight="700" letterSpacing="0.05em">MATRIZ MITOCONDRIAL</text>
 
+      {/* ENTRADA DE ELECTRONES DESDE LA NORIA -> Complejos I y II */}
+      {!hypoxia && (
+        <g>
+          {/* Dos caños: NADH -> Comp. I, FADH2 -> Comp. II */}
+          <path id="eIn1" d="M 16 232 Q 24 232 34 218" fill="none" stroke="#fde047" strokeWidth="3.2" strokeDasharray="6 4" className="active-stream" strokeLinecap="round" />
+          <path id="eIn2" d="M 16 240 Q 70 240 94 218" fill="none" stroke="#38bdf8" strokeWidth="3.2" strokeDasharray="6 4" className="active-stream" strokeLinecap="round" />
+          {['eIn1', 'eIn2'].map((pid, k) =>
+            [0, 0.35, 0.7].map((d, i) => (
+              <circle key={`${pid}-${i}`} r="3.8" fill={k === 0 ? '#fde047' : '#7dd3fc'} filter="url(#neonGlow)">
+                <animateMotion dur={`${1.0 * speed}s`} begin={`${d * speed}s`} repeatCount="indefinite">
+                  <mpath href={`#${pid}`} />
+                </animateMotion>
+              </circle>
+            ))
+          )}
+          {/* Cartel de procedencia */}
+          <g transform="translate(112, 242)">
+            <rect x="0" y="-9" width="118" height="17" rx="8.5" fill="#082f49" stroke="#38bdf8" strokeWidth="1.3" />
+            <text x="59" y="3" textAnchor="middle" fill="#e0f2fe" fontSize="9.5" fontWeight="800">⚡ e⁻ desde la Noria</text>
+          </g>
+        </g>
+      )}
+
       {/* Caída de protones hacia el molinete */}
       <path d="M 276 122 L 322 122" stroke={tone} strokeWidth="4" strokeDasharray="5 3" className={hypoxia ? '' : 'active-stream'} />
       {!hypoxia && [0, 0.5].map((b, i) => (
@@ -1231,8 +1254,8 @@ export default function App() {
               </div>
 
               <svg
-                viewBox="0 0 280 272"
-                className={`w-full max-w-[340px] lg:max-w-[270px] overflow-visible select-none ${
+                viewBox="-60 -14 400 316"
+                className={`w-full max-w-[460px] lg:max-w-[360px] overflow-visible select-none ${
                   phys.hypoxia ? 'noria-stalled-shake' : exerciseLoad === 'aerobic' ? 'noria-turbo-vib' : ''
                 }`}
               >
@@ -1249,7 +1272,7 @@ export default function App() {
                   <path id="acetylEntryPath" d="M 140 2 L 140 50" />
                   <path id="co2ExitPath1" d="M 198 92 Q 225 78 252 66" />
                   <path id="co2ExitPath2" d="M 198 188 Q 225 198 252 212" />
-                  <path id="nadhDischargePath" d="M 140 182 Q 195 235 262 248" />
+                  <path id="nadhDischargePath" d="M 140 192 Q 215 262 326 276" />
                   <path id="oaaEscapePath" d="M 62 128 Q 38 92 22 64" />
                 </defs>
 
@@ -1294,15 +1317,15 @@ export default function App() {
                     );
                   })}
 
-                  <Cabin x={140} y={56} speed={phys.krebsSpeed} ring={{ fill: '#064e3b', stroke: '#10b981' }} dot="#34d399" rect={{ fill: '#052e16', stroke: '#10b981', text: '#bbf7d0' }} label="Citrato (6C)" rw={92} ry={-31} ty={-16.5} fs={10.5} />
-                  <Cabin x={224} y={140} speed={phys.krebsSpeed} ring={{ fill: '#0c4a6e', stroke: '#38bdf8' }} dot="#7dd3fc" rect={{ fill: '#082f49', stroke: '#38bdf8', text: '#e0f2fe' }} label="α-Cetoglut (5C)" rw={96} ry={-11} ty={3.5} fs={10} />
-                  <Cabin x={140} y={224} speed={phys.krebsSpeed} ring={{ fill: '#1e1b4b', stroke: '#818cf8' }} dot="#a5b4fc" rect={{ fill: '#1e1b4b', stroke: '#818cf8', text: '#e0e7ff' }} label="Succinato (4C)" rw={92} ry={9} ty={23.5} fs={10.5} />
+                  <Cabin x={140} y={56} speed={phys.krebsSpeed} ring={{ fill: '#064e3b', stroke: '#10b981' }} dot="#34d399" rect={{ fill: '#052e16', stroke: '#10b981', text: '#bbf7d0' }} label="Citrato (6C)" rw={100} ry={-31} ty={-16.5} fs={10.5} />
+                  <Cabin x={224} y={140} speed={phys.krebsSpeed} ring={{ fill: '#0c4a6e', stroke: '#38bdf8' }} dot="#7dd3fc" rect={{ fill: '#082f49', stroke: '#38bdf8', text: '#e0f2fe' }} label="α-Cetoglut (5C)" rw={104} ry={-11} ty={3.8} fs={10.5} />
+                  <Cabin x={140} y={224} speed={phys.krebsSpeed} ring={{ fill: '#1e1b4b', stroke: '#818cf8' }} dot="#a5b4fc" rect={{ fill: '#1e1b4b', stroke: '#818cf8', text: '#e0e7ff' }} label="Succinato (4C)" rw={100} ry={9} ty={23.5} fs={10.5} />
                   <Cabin
                     x={56} y={140} speed={phys.krebsSpeed}
                     ring={{ fill: '#4c0519', stroke: phys.oaaEscape ? '#c084fc' : '#fb7185' }}
                     dot={phys.oaaEscape ? '#e879f9' : '#fda4af'}
                     rect={{ fill: phys.oaaEscape ? '#3b0764' : '#4c0519', stroke: phys.oaaEscape ? '#c084fc' : '#fb7185', text: '#ffe4e6' }}
-                    label="Oxalacetato (4C)" rw={96} ry={-11} ty={3.5} fs={10}
+                    label="Oxalacetato (4C)" rw={104} ry={-11} ty={3.8} fs={10.5}
                   />
                 </g>
 
@@ -1326,21 +1349,33 @@ export default function App() {
                   </g>
                 ))}
 
-                {/* Electrones hacia la Represa */}
+                {/* ENERGÍA HACIA LA REPRESA: chorro grueso, partículas, flecha y cartel que pulsa con la velocidad */}
                 {!phys.hypoxia && (
-                  <>
-                    <use href="#nadhDischargePath" fill="none" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 4" opacity="0.65" />
-                    {[0, 0.6].map((d, i) => (
-                      <circle key={`nadh-${i}`} r="3.8" fill="#38bdf8" filter="url(#noriaNeon)">
-                        <animateMotion dur="1.2s" begin={`${d}s`} repeatCount="indefinite"><mpath href="#nadhDischargePath" /></animateMotion>
-                        <animate attributeName="opacity" values="1;0.1" dur="1.2s" begin={`${d}s`} repeatCount="indefinite" />
+                  <g>
+                    <path d="M 140 192 Q 215 262 326 276" fill="none" stroke="#0ea5e9" strokeWidth="11" opacity="0.18" strokeLinecap="round" />
+                    <use href="#nadhDischargePath" fill="none" stroke="#38bdf8" strokeWidth="4.5" strokeDasharray="9 5" className="active-stream" strokeLinecap="round" />
+                    {[0, 0.2, 0.4, 0.6, 0.8, 1.0].map((d, i) => (
+                      <circle key={`nadh-${i}`} r={i % 2 ? 4.2 : 5.4} fill={i % 2 ? '#7dd3fc' : '#fde047'} filter="url(#noriaNeon)">
+                        <animateMotion
+                          dur={`${Math.max(0.6, Math.min(1.8, phys.krebsSpeed * 0.28))}s`}
+                          begin={`${d}s`} repeatCount="indefinite"
+                        >
+                          <mpath href="#nadhDischargePath" />
+                        </animateMotion>
                       </circle>
                     ))}
-                    <g transform="translate(232, 248)">
-                      <rect x="-38" y="-9" width="76" height="17" rx="5" fill="#082f49" stroke="#0284c7" strokeWidth="1" />
-                      <text x="0" y="2.5" textAnchor="middle" fill="#7dd3fc" fontSize="8" fontWeight="bold">⚡ e⁻ → Represa</text>
+                    {/* Flecha */}
+                    <path d="M 306 262 L 330 276 L 304 286 Z" fill="#38bdf8" filter="url(#noriaNeon)">
+                      <animate attributeName="opacity" values="1;0.4;1" dur="0.9s" repeatCount="indefinite" />
+                    </path>
+                    {/* Cartel grande */}
+                    <g transform="translate(246, 296)">
+                      <rect x="-82" y="-13" width="164" height="26" rx="13" fill="#082f49" stroke="#38bdf8" strokeWidth="1.8" filter="url(#noriaNeon)">
+                        <animate attributeName="stroke-opacity" values="1;0.4;1" dur="1.1s" repeatCount="indefinite" />
+                      </rect>
+                      <text x="0" y="4.5" textAnchor="middle" fill="#e0f2fe" fontSize="11.5" fontWeight="900">⚡ Energía (e⁻) → Represa</text>
                     </g>
-                  </>
+                  </g>
                 )}
 
                 {/* Fuga de Oxalacetato */}
@@ -1357,14 +1392,20 @@ export default function App() {
                   </g>
                 )}
 
-                {/* Núcleo / Turbina central */}
+                {/* Núcleo / Turbina central (el título se achica solo si es largo) */}
                 <g className="noria-hub-glow">
-                  <circle cx="140" cy="140" r="44" fill="url(#noriaHub)" stroke={noriaAccent} strokeWidth="2.8" />
-                  <circle cx="140" cy="140" r="39" fill="none" stroke={phys.hypoxia ? '#fb7185' : '#38bdf8'} strokeWidth="1" strokeDasharray="4 3" opacity="0.5" />
-                  <text x="140" y="126" textAnchor="middle" fill="#94a3b8" fontSize="7.5" fontWeight="bold" letterSpacing="0.06em">TURBINA KREBS</text>
-                  <text x="140" y="140" textAnchor="middle" fill={phys.hypoxia ? '#fda4af' : '#38bdf8'} fontSize="10" fontWeight="900">{phys.krebsCenterTitle}</text>
-                  <text x="140" y="153" textAnchor="middle" fill="#fde047" fontSize="8.5" fontWeight="bold">3 NADH • 1 FADH₂</text>
-                  <text x="140" y="164" textAnchor="middle" fill="#34d399" fontSize="8" fontWeight="bold">+ 1 GTP (ATP)</text>
+                  <circle cx="140" cy="140" r="52" fill="url(#noriaHub)" stroke={noriaAccent} strokeWidth="3" />
+                  <circle cx="140" cy="140" r="46" fill="none" stroke={phys.hypoxia ? '#fb7185' : '#38bdf8'} strokeWidth="1" strokeDasharray="4 3" opacity="0.5" />
+                  <text x="140" y="116" textAnchor="middle" fill="#94a3b8" fontSize="8" fontWeight="bold" letterSpacing="0.06em">TURBINA KREBS</text>
+                  <text
+                    x="140" y="136" textAnchor="middle"
+                    fill={phys.hypoxia ? '#fda4af' : '#38bdf8'} fontWeight="900"
+                    fontSize={Math.max(7, Math.min(12, 86 / (Math.max(6, phys.krebsCenterTitle.length) * 0.74)))}
+                  >
+                    {phys.krebsCenterTitle}
+                  </text>
+                  <text x="140" y="153" textAnchor="middle" fill="#fde047" fontSize="9.5" fontWeight="bold">3 NADH • 1 FADH₂</text>
+                  <text x="140" y="166" textAnchor="middle" fill="#34d399" fontSize="9" fontWeight="bold">+ 1 GTP (ATP)</text>
                 </g>
               </svg>
             </div>
