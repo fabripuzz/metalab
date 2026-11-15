@@ -1540,9 +1540,9 @@ export default function App() {
                 { name: 'Grelina (Estómago - Hambre)', data: phys.ghrelin, color: 'bg-yellow-500', text: 'text-yellow-400' }
               ].map((h, i) => (
                 <div key={i}>
-                  <div className="flex items-center justify-between text-[11px] mb-1">
-                    <span className="font-bold text-slate-300">{h.name}</span>
-                    <span className={`text-[10px] font-extrabold ${h.text}`}>{h.data.label}</span>
+                  <div className="flex items-start justify-between gap-2 text-[11px] mb-1">
+                    <span className="font-bold text-slate-300 leading-snug break-words min-w-0">{h.name}</span>
+                    <span className={`text-[10px] font-extrabold leading-snug text-right break-words max-w-[58%] ${h.text}`}>{h.data.label}</span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800/80">
                     <div className={`h-full ${h.color} transition-all duration-500`} style={{ width: `${h.data.bar}%` }} />
@@ -1578,9 +1578,9 @@ export default function App() {
               <div className="space-y-2.5">
                 {currentOrgan.enzymes.map((enz, idx) => (
                   <div key={idx} className="bg-slate-950/90 border border-slate-800/90 rounded-xl p-2.5">
-                    <div className="flex items-center justify-between gap-1.5 mb-1">
-                      <span className="text-xs font-extrabold text-slate-100">{enz.name}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border shrink-0 ${
+                    <div className="mb-1.5 flex flex-col items-start gap-1.5">
+                      <span className="text-xs font-extrabold text-slate-100 leading-snug break-words">{enz.name}</span>
+                      <span className={`max-w-full text-[10px] font-bold leading-snug px-2 py-0.5 rounded-md border break-words ${
                         enz.active
                           ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
                           : 'bg-rose-500/15 text-rose-300 border-rose-500/40'
