@@ -1127,7 +1127,7 @@ export default function App() {
       <main className="flex-1 max-w-[1640px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
 
         {/* ================= COLUMNA IZQUIERDA: CONTROLES + NORIA ================= */}
-        <section className={`lg:col-span-3 flex flex-col gap-3 order-1 ${mobileTab === 'enzymes' ? 'hidden lg:flex' : 'flex'}`}>
+        <section className="lg:col-span-3 flex flex-col gap-3 order-1">
 
           <div className="bg-[#0b101e] border border-slate-800/90 rounded-2xl p-3.5 shadow-xl space-y-3">
             {/* 1. ESTADO METABÓLICO */}
