@@ -22,18 +22,27 @@ const wrapText = (text, max) => {
 const blobPath = (w, h, [r1, r2, r3, r4]) =>
   `M ${r1} 0 H ${w - r2} Q ${w} 0 ${w} ${r2} V ${h - r3} Q ${w} ${h} ${w - r3} ${h} H ${r4} Q 0 ${h} 0 ${h - r4} V ${r1} Q 0 0 ${r1} 0 Z`;
 
+/* Color de cada flecha = lo que viaja (siempre el mismo) */
+const FLOW = {
+  glucose: { c: '#22c55e', d: '#86efac', name: 'Glucosa' },          // verde
+  amino:   { c: '#06b6d4', d: '#67e8f9', name: 'Aminoácidos / Alanina' }, // celeste
+  fat:     { c: '#facc15', d: '#fef08a', name: 'Grasas (AG, VLDL, quilomicrones)' }, // dorado
+  ketone:  { c: '#a855f7', d: '#d8b4fe', name: 'Cetonas' },          // violeta
+  lactate: { c: '#f43f5e', d: '#fda4af', name: 'Lactato' }           // rojo
+};
+
 const ORGAN_THEME = {
   brain: {
     radii: [54, 30, 54, 30], stroke: '#a855f7', hi: '#c084fc', top: '#2a1750', bot: '#110a24', title: '#f3e8ff',
     p1: { fill: '#2e1065', stroke: '#a855f7', text: '#f3e8ff' }, p2: { fill: '#150d2b', stroke: '#6b21a8', text: '#e9d5ff' }
   },
   liver: {
-    radii: [34, 58, 34, 52], stroke: '#f59e0b', hi: '#fbbf24', top: '#41230a', bot: '#1c0e04', title: '#fef3c7',
-    p1: { fill: '#4a1d03', stroke: '#f59e0b', text: '#fef3c7' }, p2: { fill: '#1d1005', stroke: '#b45309', text: '#fed7aa' }
+    radii: [34, 58, 34, 52], stroke: '#ea7c3f', hi: '#fb9b62', top: '#4a2412', bot: '#1f0f08', title: '#ffe9dc',
+    p1: { fill: '#5a2a12', stroke: '#ea7c3f', text: '#ffe9dc' }, p2: { fill: '#24120a', stroke: '#b4552a', text: '#fed7bf' }
   },
   adipose: {
-    radii: [56, 56, 56, 56], stroke: '#eab308', hi: '#fde047', top: '#352c08', bot: '#171204', title: '#fef9c3',
-    p1: { fill: '#422006', stroke: '#eab308', text: '#fef9c3' }, p2: { fill: '#191505', stroke: '#a16207', text: '#fef08a' }
+    radii: [56, 56, 56, 56], stroke: '#facc15', hi: '#fde047', top: '#3a3208', bot: '#171403', title: '#fefce8',
+    p1: { fill: '#3f3a06', stroke: '#facc15', text: '#fefce8' }, p2: { fill: '#1a1704', stroke: '#a38b0c', text: '#fef08a' }
   },
   intestine: {
     radii: [36, 52, 30, 56], stroke: '#10b981', hi: '#34d399', top: '#0a4030', bot: '#031a13', title: '#ecfdf5',
@@ -847,10 +856,10 @@ export default function App() {
     liver: {
       name: 'Hígado',
       icon: '🫀',
-      accentText: 'text-amber-400',
-      borderClass: 'border-amber-500/50',
-      badgeClass: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
-      btnActiveClass: 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm shadow-amber-500/20',
+      accentText: 'text-orange-400',
+      borderClass: 'border-orange-500/50',
+      badgeClass: 'bg-orange-500/15 text-orange-300 border-orange-500/40',
+      btnActiveClass: 'bg-orange-500 text-slate-950 border-orange-400 shadow-sm shadow-orange-500/20',
       mapBadge1: isPostprandial
         ? (mealType === 'keto' ? 'Gluconeogénesis + Cetogénesis' : mealType === 'protein' ? 'Ciclo de la Urea + Gluconeogén.' : 'Glucogenogénesis + Glucólisis')
         : (fastingPhase === '4_12h' ? 'Glucogenólisis (4-12h)' : 'Gluconeogénesis Activa'),
@@ -1452,21 +1461,21 @@ export default function App() {
 
                 {/* ---- Mapa de órganos. Hígado al centro (x=470, y≈645) ---- */}
                 {/* Hígado -> Cerebro: sale del borde superior-izquierdo del hígado */}
-                <Flow d="M 400 560 Q 330 520 270 498" on color={flowKetones ? '#c084fc' : '#10b981'} dot={flowKetones ? '#d8b4fe' : '#34d399'} dur={1.6} label={flowKetones ? 'Glucosa + Cetonas' : 'Glucosa'} lx={345} ly={518} />
+                <Flow d="M 400 560 Q 330 520 270 498" on color={flowKetones ? FLOW.ketone.c : FLOW.glucose.c} dot={flowKetones ? FLOW.ketone.d : FLOW.glucose.d} dur={1.6} label={flowKetones ? 'Glucosa + Cetonas' : 'Glucosa'} lx={345} ly={518} />
                 {/* Hígado -> Tejido adiposo (VLDL): borde superior-derecho */}
-                <Flow d="M 540 560 Q 610 520 690 498" on={flowVldl} color="#f59e0b" dot="#fbbf24" w={2.8} dur={1.7} label="VLDL (Apo B-100)" lx={612} ly={516} />
+                <Flow d="M 540 560 Q 610 520 690 498" on={flowVldl} color={FLOW.fat.c} dot={FLOW.fat.d} w={2.8} dur={1.7} label="VLDL (Apo B-100)" lx={612} ly={516} />
                 {/* Tejido adiposo -> Hígado (lipólisis): borde derecho del hígado */}
-                <Flow d="M 800 498 Q 740 600 592 640" on={flowLipolysisToLiver} color="#f59e0b" dot="#fbbf24" dur={1.7} label="AG Libres + Glicerol" lx={712} ly={598} />
+                <Flow d="M 800 498 Q 740 600 592 640" on={flowLipolysisToLiver} color={FLOW.fat.c} dot={FLOW.fat.d} dur={1.7} label="AG Libres + Glicerol" lx={712} ly={598} />
                 {/* Tejido adiposo -> Músculo (ácidos grasos): baja por la derecha */}
-                <Flow d="M 850 498 Q 905 640 850 780" on={flowLipolysisToMuscle} color="#f59e0b" dot="#fbbf24" w={2.8} dur={1.6} label="Ácidos Grasos" lx={890} ly={640} />
+                <Flow d="M 850 498 Q 905 640 850 780" on={flowLipolysisToMuscle} color={FLOW.fat.c} dot={FLOW.fat.d} w={2.8} dur={1.6} label="Ácidos Grasos" lx={890} ly={640} />
                 {/* Intestino -> Hígado (vena porta): borde inferior-izquierdo */}
-                <Flow d="M 220 790 Q 300 730 350 700" on={flowIntestinePortal} color="#10b981" dot="#34d399" dur={1.5} label="Glucosa / AA (Porta)" lx={262} ly={742} />
+                <Flow d="M 220 790 Q 300 730 350 700" on={flowIntestinePortal} color={FLOW.glucose.c} dot={FLOW.glucose.d} dur={1.5} label="Glucosa / AA (Porta)" lx={262} ly={742} />
                 {/* Intestino -> Tejido adiposo (quilomicrones por linfa): arco por debajo del hígado */}
-                <Flow d="M 290 880 Q 620 960 780 498" on={flowChylomicrons} color="#eab308" dot="#fde047" w={2.5} dur={2.2} label="Quilomicrones (Linfa)" lx={470} ly={942} />
+                <Flow d="M 290 880 Q 620 960 780 498" on={flowChylomicrons} color={FLOW.fat.c} dot={FLOW.fat.d} w={2.5} dur={2.2} label="Quilomicrones (Linfa)" lx={470} ly={942} />
                 {/* Hígado -> Músculo */}
-                <Flow d="M 575 716 Q 635 750 705 778" on color="#06b6d4" dot="#38bdf8" w={2.5} dur={1.7} label={flowKetones ? 'Cetonas / Gluc' : 'Glucosa'} lx={640} ly={736} arrow />
+                <Flow d="M 575 716 Q 635 750 705 778" on color={flowKetones ? FLOW.ketone.c : FLOW.glucose.c} dot={flowKetones ? FLOW.ketone.d : FLOW.glucose.d} w={2.5} dur={1.7} label={flowKetones ? 'Cetonas / Gluc' : 'Glucosa'} lx={640} ly={736} arrow />
                 {/* Músculo -> Hígado (Cori / alanina): arco inferior */}
-                <Flow d="M 650 868 Q 520 860 470 748" on={flowCoriOrAlanine} color={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} dot={exerciseLoad === 'strength' ? '#fb7185' : '#34d399'} w={2.8} dur={1.5} label={exerciseLoad === 'strength' ? 'Lactato (Ciclo de Cori)' : 'Alanina (Ciclo Glu-Ala)'} lx={540} ly={858} arrow />
+                <Flow d="M 650 868 Q 520 860 470 748" on={flowCoriOrAlanine} color={exerciseLoad === 'strength' ? FLOW.lactate.c : FLOW.amino.c} dot={exerciseLoad === 'strength' ? FLOW.lactate.d : FLOW.amino.d} w={2.8} dur={1.5} label={exerciseLoad === 'strength' ? 'Lactato (Ciclo de Cori)' : 'Alanina (Ciclo Glu-Ala)'} lx={540} ly={858} arrow />
 
                 {/* ---- ÓRGANOS ---- */}
                 <OrganCard {...organProps('brain')} x={110} y={340} w={250} title="CEREBRO" />
@@ -1475,6 +1484,16 @@ export default function App() {
                 <OrganCard {...organProps('intestine')} x={40} y={780} w={250} title="INTESTINO" />
                 <OrganCard {...organProps('muscle')} x={650} y={780} w={260} title="MÚSCULO" />
               </svg>
+            </div>
+
+            {/* Leyenda: el color de cada flecha indica qué viaja */}
+            <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-semibold text-slate-300">
+              {Object.values(FLOW).map((f) => (
+                <span key={f.name} className="inline-flex items-center gap-1.5">
+                  <span className="inline-block h-[3px] w-5 rounded-full" style={{ background: f.c }} />
+                  {f.name}
+                </span>
+              ))}
             </div>
 
             {/* Selector rápido inferior de órganos */}
